@@ -30,10 +30,8 @@ def import_data(filename):
             key_str = None
             val_str = None
             dict_ele = []
-            print child.tag
-            print child.attrib
             if child.attrib:
-                print "key = " + child.attrib['name']
+                #print "key = " + child.attrib['name']
                 key_str = child.attrib['name']
                 val_str = child.text
             else:
@@ -94,7 +92,5 @@ def save_result_xml(file='res.xml', res_list=[], apptype=0):
                 root.appendChild(stringNode)
         dom.writexml(fp, addindent='  ', newl='\n', encoding='utf-8')
 
-    #print "value = " + child.text
-    #print root.items
 
 #packet_to_xml()
