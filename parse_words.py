@@ -161,6 +161,11 @@ def excel_table_byindex(file= 'file.xls',colnameindex=0,by_index=0):
         if (len(row) > 2 ):
             if (row[0].startswith('//') or row[0].startswith('/*')):
                 map_dict.append(row[0])
+            elif (row[1] == ''):
+                map_dict.append(row[0])
+            elif (row[1] != '' and row[2] == ''):
+                map_dict.append(row[0])
+                map_dict.append(row[1])
             else:
                 map_dict.append(row[0])
                 map_dict.append(row[2])

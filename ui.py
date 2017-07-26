@@ -7,6 +7,7 @@ import ttk
 import tkMessageBox
 import globalVal
 import parse_words
+import parseFromXml
 
 
 #获取脚本文件的当前路径
@@ -27,7 +28,17 @@ def choose_data_file():
     filename = tkFileDialog.askopenfilename(title='choose data file',
                                             filetypes=[('TXT', '*.txt'),('XML', '*.xml')],
                                             initialdir=cur_file_dir())
-    parse_words.import_data(filename)
+
+    pathext = os.path.splitext(filename)[1]
+    print pathext
+    if pathext == '.xml' or pathext == '.XML':
+        print "XML FILE"
+        parseFromXml.import_data(filename)
+    elif pathext == '.txt' or pathext == '.TXT':
+        print "TXT FILE"
+        parse_words.import_data(filename)
+    else:
+        return
     data_excel_name = tkFileDialog.asksaveasfilename(title='save empty Excel file',
                                         filetypes=[('Excel', '*.xls')],
                                        initialdir=cur_file_dir())
@@ -42,11 +53,29 @@ def choose_excel_file():
                                                    initialdir=cur_file_dir())
     map_dict_val = parse_words.excel_table_byindex(file=excel_file_name)
     #print map_dict_val
+    return map_dict_val
+
+
+
+def save_to_txt():
+    map_dict_val = choose_excel_file()
     res_file_name = tkFileDialog.asksaveasfilename(title='save result file',
                                                    filetypes=[('TXT', '*.txt')],
-                                                     initialdir=cur_file_dir())
+                                                   initialdir=cur_file_dir())
     # parse_words.save_to_cvs(data_excel_name, globalVal.g_map_all_vals)
+
     parse_words.save_result_txt(res_file_name, map_dict_val)
+    str_val = 'success ! \n RESULT File Path: %s' % (res_file_name)
+    msgBox = tkMessageBox.showinfo('Result', str_val)
+
+def save_to_xml():
+    map_dict_val = choose_excel_file()
+    res_file_name = tkFileDialog.asksaveasfilename(title='save result file',
+                                                   filetypes=[('XML', '*.xml')],
+                                                   initialdir=cur_file_dir())
+    # parse_words.save_to_cvs(data_excel_name, globalVal.g_map_all_vals)
+
+    parseFromXml.save_result_xml(res_file_name, map_dict_val)
     str_val = 'success ! \n RESULT File Path: %s' % (res_file_name)
     msgBox = tkMessageBox.showinfo('Result', str_val)
 
@@ -113,9 +142,11 @@ def botton_ui_create():
     centerFrame = Frame(root)
     centerFrame.pack(fill=X, side=TOP)
 
-    buttonImport = Button(centerFrame, text='Import Data', width = 20, height = 4, command=choose_data_file)
+    buttonImport = Button(centerFrame, text='Import Data', width = 40, height = 4, command=choose_data_file)
     buttonImport.pack(side=TOP)
-    buttonImport = Button(centerFrame, text='Import RESULT EXCEL', width=20, height=4, command=choose_excel_file)
+    buttonImport = Button(centerFrame, text='Convert RESULT EXCEL TO IOS TXT', width=40, height=4, command=save_to_txt)
+    buttonImport.pack(side=TOP)
+    buttonImport = Button(centerFrame, text='Convert RESULT EXCEL Android XML', width=40, height=4, command=save_to_xml)
     buttonImport.pack(side=TOP)
     mainloop()
 
