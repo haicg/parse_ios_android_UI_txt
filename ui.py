@@ -20,6 +20,33 @@ def cur_file_dir():
      elif os.path.isfile(path):
          return os.path.dirname(path)
 
+def get_txt_dialog_option(title, filename):
+    options = {}
+    options['defaultextension'] = '.txt'
+    options['filetypes'] = [('TXT', '*.txt')]
+    options['initialdir'] = cur_file_dir()
+    options['initialfile'] = filename
+    options['title'] = title
+    return options
+
+
+def get_xls_dialog_option(title, filename):
+    options = {}
+    options['defaultextension'] = '.xls'
+    options['filetypes'] = [('Excel', '*.xls')]
+    options['initialdir'] = cur_file_dir()
+    options['initialfile'] = filename
+    options['title'] = title
+    return options
+
+def get_xml_dialog_option(title, filename):
+    options = {}
+    options['defaultextension'] = '.xml'
+    options['filetypes'] = [('*.XML', '*.xml')]
+    options['initialdir'] = cur_file_dir()
+    options['initialfile'] = filename
+    options['title'] = title
+    return options
 
 def donothing():
     x = 0
@@ -48,20 +75,22 @@ def choose_data_file():
     msgBox = tkMessageBox.showinfo('Result', str_val)
 
 def choose_excel_file():
-    excel_file_name = tkFileDialog.askopenfilename(title='Excel file',
-                                                    filetypes=[('Excel', '*.xls')],
-                                                   initialdir=cur_file_dir())
-    map_dict_val = parse_words.excel_table_byindex(file=excel_file_name)
+    map_dict_val = []
+    option = {}
+    option = get_xls_dialog_option('Excel file', "")
+    excel_file_name = tkFileDialog.askopenfilename(**option)
+    if excel_file_name == None or excel_file_name == "":
+        return map_dict_val
+    else :
+        map_dict_val = parse_words.excel_table_byindex(file=excel_file_name)
     #print map_dict_val
     return map_dict_val
 
-
-
 def save_to_txt():
     map_dict_val = choose_excel_file()
-    res_file_name = tkFileDialog.asksaveasfilename(title='save result file',
-                                                   filetypes=[('TXT', '*.txt')],
-                                                   initialdir=cur_file_dir())
+    option = {}
+    option = get_txt_dialog_option('save result file', "")
+    res_file_name = tkFileDialog.asksaveasfilename(**option)
     # parse_words.save_to_cvs(data_excel_name, globalVal.g_map_all_vals)
 
     parse_words.save_result_txt(res_file_name, map_dict_val)
@@ -70,9 +99,9 @@ def save_to_txt():
 
 def save_to_xml():
     map_dict_val = choose_excel_file()
-    res_file_name = tkFileDialog.asksaveasfilename(title='save result file',
-                                                   filetypes=[('XML', '*.xml')],
-                                                   initialdir=cur_file_dir())
+    option = {}
+    option = get_xml_dialog_option('save result file', "")
+    res_file_name = tkFileDialog.asksaveasfilename(**option)
     # parse_words.save_to_cvs(data_excel_name, globalVal.g_map_all_vals)
 
     parseFromXml.save_result_xml(res_file_name, map_dict_val)

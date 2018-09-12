@@ -82,8 +82,12 @@ def save_result_xml(file='res.xml', res_list=[], apptype=0):
                     #s = u'"%s" = "%s";\n' % (ele[0], ele[1])
                     stringNode = dom.createElement('string')
                     stringNode.setAttribute('name', ele[0])
-                    textNode = dom.createTextNode(ele[1])
-                    stringNode.appendChild(textNode)
+                    try:
+                        textNode = dom.createTextNode(ele[1])
+                        stringNode.appendChild(textNode)
+                    except Exception as e:
+                        print (e)
+                        raise TypeError, ele[1] + "Not String"
                 else:
                     continue
             else:

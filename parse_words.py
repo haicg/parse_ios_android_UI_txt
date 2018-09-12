@@ -145,6 +145,14 @@ def open_excel(file= 'file.xls'):
     except Exception,e:
         print str(e)
 
+def read_cell(table, x, y):
+    if table.cell_type(x, y) == 4:  # 4是真值类型(bool)
+        return "TRUE" if table.cell_value(x, y) == 1 else "FALSE"
+    elif table.cell_type(x, y) == 2:  # 2是数字类型(number)
+        return str(table.cell_value(x, y))
+    else:  # 其他类型不再一一列举，用到时再做增加
+        return table.cell_value(x, y)
+
 #根据索引获取Excel表格中的数据
 # 参数:file：Excel文件路径
 # colnameindex：表头列名所在行的所以  ，by_index：表的索引
@@ -159,6 +167,9 @@ def excel_table_byindex(file= 'file.xls',colnameindex=0,by_index=0):
         row = table.row_values(rownum)
         map_dict = []
         if (len(row) > 2 ):
+            row[0] = read_cell(table, rownum, 0)
+            row[1] = read_cell(table, rownum, 1)
+            row[2] = read_cell(table, rownum, 2)
             if (row[0].startswith('//') or row[0].startswith('/*')):
                 map_dict.append(row[0])
             elif (row[1] == ''):
