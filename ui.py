@@ -114,17 +114,34 @@ def save_to_txt():
     msgBox = tkMessageBox.showinfo('Result', str_val)
     save_err_check_to_file(res_file_name)
 
+def converXmlToAndroidXml(oldfile, androidXmlFile):
+    buf = u""
+    with codecs.open(oldfile, 'r', encoding='utf8') as fp:
+        buf = fp.read();
+        buf = buf.replace('&amp;', '&#038;');
+        buf = buf.replace('&lt;', '&#060;');
+        buf = buf.replace('&gt;', '&#062;');
+        buf = buf.replace('&quot;', '&#034;');
+        buf = buf.replace('&apos;', '&#039;');
+
+    with codecs.open(androidXmlFile, 'w', encoding='utf8') as fp_write:
+        fp_write.write(buf)
+
+
 def save_to_xml():
     map_dict_val = choose_excel_file()
     option = {}
     option = get_xml_dialog_option('save result file', globalVal.g_excel_file)
     res_file_name = tkFileDialog.asksaveasfilename(**option)
     # parse_words.save_to_cvs(data_excel_name, globalVal.g_map_all_vals)
-
-    parseFromXml.save_result_xml(res_file_name, map_dict_val)
+    res_file_name_tmp = res_file_name + "_tmp"
+    parseFromXml.save_result_xml(res_file_name_tmp, map_dict_val)
+    converXmlToAndroidXml(res_file_name_tmp, res_file_name);
     str_val = 'success ! \n RESULT File Path: %s' % (res_file_name)
     msgBox = tkMessageBox.showinfo('Result', str_val)
+
     save_err_check_to_file(res_file_name)
+
 
 def ui_create():
     root = Tk()
