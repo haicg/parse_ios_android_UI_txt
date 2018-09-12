@@ -166,20 +166,33 @@ def excel_table_byindex(file= 'file.xls',colnameindex=0,by_index=0):
     for rownum in range(0,nrows):
         row = table.row_values(rownum)
         map_dict = []
+        typeCell0 = table.cell_type(rownum, 0)
+        typeCell1 = table.cell_type(rownum, 1)
+        typeCell2 = table.cell_type(rownum, 2)
         if (len(row) > 2 ):
             row[0] = read_cell(table, rownum, 0)
             row[1] = read_cell(table, rownum, 1)
             row[2] = read_cell(table, rownum, 2)
             if (row[0].startswith('//') or row[0].startswith('/*')):
                 map_dict.append(row[0])
-            elif (row[1] == ''):
+            elif (row[1] == '' or typeCell0 == 0):
                 map_dict.append(row[0])
-            elif (row[1] != '' and row[2] == ''):
+            elif row[2] == '' or typeCell2 == 0:
                 map_dict.append(row[0])
                 map_dict.append(row[1])
+                if (typeCell0 != 1 or typeCell1 != 1):
+                    err_msg = {}
+                    err_msg['line'] = rownum;
+                    err_msg['key'] = row[0];
+                    globalVal.g_list_result_error_cols.append(err_msg)
             else:
                 map_dict.append(row[0])
                 map_dict.append(row[2])
+                if (typeCell0 != 1 or typeCell1 != 1 or typeCell2 != 1):
+                    err_msg = {}
+                    err_msg['line'] = rownum;
+                    err_msg['key'] = row[0];
+                    globalVal.g_list_result_error_cols.append(err_msg)
         elif (len(row) > 0) :
             map_dict.append(row[0])
         else:

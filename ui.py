@@ -1,5 +1,6 @@
 # coding=utf-8
-
+import codecs
+import json
 import tkFileDialog
 from Tkinter import *
 from FileDialog import *
@@ -76,6 +77,7 @@ def choose_data_file():
 
 def choose_excel_file():
     map_dict_val = []
+    globalVal.g_excel_file = ""
     option = {}
     option = get_xls_dialog_option('Excel file', "")
     excel_file_name = tkFileDialog.askopenfilename(**option)
@@ -83,31 +85,46 @@ def choose_excel_file():
         return map_dict_val
     else :
         map_dict_val = parse_words.excel_table_byindex(file=excel_file_name)
+    (filepath, tempfilename) = os.path.split(excel_file_name)
+    os.path.splitext(tempfilename)
+    (filename, extension) = os.path.splitext(tempfilename)
+    globalVal.g_excel_file = filename;
     #print map_dict_val
     return map_dict_val
+
+def save_err_check_to_file(res_file_name):
+    (filepath, tempfilename) = os.path.split(res_file_name)
+    os.path.splitext(tempfilename)
+    (filename, extension) = os.path.splitext(tempfilename)
+    ResultErrorColsFile = filepath + '/' + filename + "_ResultErrorCols.txt"
+    with codecs.open(ResultErrorColsFile, 'w', encoding='utf8') as fp:
+        resErrorBuf = json.dump(globalVal.g_list_result_error_cols, fp, indent=4)
+    msgBox = tkMessageBox.showinfo('Notification', "Need Read " + ResultErrorColsFile)
+    globalVal.g_list_result_error_cols = []
 
 def save_to_txt():
     map_dict_val = choose_excel_file()
     option = {}
-    option = get_txt_dialog_option('save result file', "")
+    option = get_txt_dialog_option('save result file', globalVal.g_excel_file)
     res_file_name = tkFileDialog.asksaveasfilename(**option)
     # parse_words.save_to_cvs(data_excel_name, globalVal.g_map_all_vals)
 
     parse_words.save_result_txt(res_file_name, map_dict_val)
     str_val = 'success ! \n RESULT File Path: %s' % (res_file_name)
     msgBox = tkMessageBox.showinfo('Result', str_val)
+    save_err_check_to_file(res_file_name)
 
 def save_to_xml():
     map_dict_val = choose_excel_file()
     option = {}
-    option = get_xml_dialog_option('save result file', "")
+    option = get_xml_dialog_option('save result file', globalVal.g_excel_file)
     res_file_name = tkFileDialog.asksaveasfilename(**option)
     # parse_words.save_to_cvs(data_excel_name, globalVal.g_map_all_vals)
 
     parseFromXml.save_result_xml(res_file_name, map_dict_val)
     str_val = 'success ! \n RESULT File Path: %s' % (res_file_name)
     msgBox = tkMessageBox.showinfo('Result', str_val)
-
+    save_err_check_to_file(res_file_name)
 
 def ui_create():
     root = Tk()
