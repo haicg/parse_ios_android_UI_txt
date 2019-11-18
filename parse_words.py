@@ -10,16 +10,13 @@ sys.setdefaultencoding('utf8')
 
 import re
 import csv
-import xlrd
 import xlwt
-import ui
 import codecs
 
 
 def connect_db():
     globalVal.g_db_conn = sqlite3.connect('test.db')
     globalVal.g_db_conn.close()
-
 
 
 def close_file(fp):
@@ -30,6 +27,7 @@ def close_file(fp):
             return "some default data"
         # Not a permission error.
         raise
+
 
 def open_file(filename):
     try:
@@ -63,38 +61,45 @@ def get_pure_data(data_str):
         return list_res[0]
     return None
 
-def store_one_recd(line_str):
+
+def store_one_recd(line_str, filedataDicts):
     line_list = line_str.split("=")
     #print line_list
-    if (len(line_list) < 2) :
-        if (len(line_list) == 1) :
+    if len(line_list) < 2:
+        if len(line_list) == 1:
             line_list[0].strip()
-            if (line_list[0].startswith('//')):
-                print "Comment"
-            elif (line_list[0].startswith('/*')):
-                print "Comment"
+            if line_list[0].startswith('//'):
+                print "Comment  : {}".format(line_str)
+                return filedataDicts
+            elif line_list[0].startswith('/*'):
+                print "Comment  : {}".format(line_str)
+                return filedataDicts
             else :
-                print "error data"
-                return
+                print "error data  list len = {} : {}".format(len(line_list), line_str)
+                return filedataDicts
         else:
-            print "error data"
-            return
-    dict_ele = []
+            print "error data EMPTY {} ".format(line_str)
+            return filedataDicts
     val_str = None
-    if (len(line_list) == 0):
-        print "ERROR DATE"
-        return
-    elif (len(line_list) > 1):
+    if len(line_list) == 0:
+        print "ERROR DATA line_list length 0"
+        return filedataDicts
+
+    elif len(line_list) > 1:
         val_str = get_pure_data(line_list[1])
         key_str = get_pure_data(line_list[0])
     else:
         val_str = None
         key_str = line_list[0]
-    dict_ele.append(key_str)
-    if (val_str):
-        dict_ele.append(val_str)
-    globalVal.g_list_all_vals.append(dict_ele)
-    return
+        print "ERROR DATA : {}".format(line_list)
+        return filedataDicts
+    if val_str:
+        # dict_ele.append(val_str)
+        filedataDicts[key_str] = val_str.strip()
+    else:
+        filedataDicts[key_str] = ""
+    # globalVal.g_list_all_vals.append(dict_ele)
+    return filedataDicts
 
 
 def save_to_excel(xlsfilename, list_val):
@@ -126,8 +131,10 @@ def save_to_cvs(csvfilename, dict_val):
             #print [k , v]
             writer.writerow([k, v])
 
-def import_data(filename):
+
+def import_ios_resource_data(filename):
     fp = None
+    filedataDicts = {}
     with codecs.open(filename, 'r', encoding='utf8') as fp:
         fp = open_file(filename)
         while True:
@@ -135,103 +142,8 @@ def import_data(filename):
             if not line:
                 break
             #print line
-            store_one_recd(line)
+            store_one_recd(line, filedataDicts)
+    return filedataDicts
 
 
-def open_excel(file= 'file.xls'):
-    try:
-        data = xlrd.open_workbook(file)
-        return data
-    except Exception,e:
-        print str(e)
 
-def read_cell(table, x, y):
-    if table.cell_type(x, y) == 4:  # 4是真值类型(bool)
-        return "TRUE" if table.cell_value(x, y) == 1 else "FALSE"
-    elif table.cell_type(x, y) == 2:  # 2是数字类型(number)
-        return str(table.cell_value(x, y))
-    else:  # 其他类型不再一一列举，用到时再做增加
-        return table.cell_value(x, y)
-
-#根据索引获取Excel表格中的数据
-# 参数:file：Excel文件路径
-# colnameindex：表头列名所在行的所以  ，by_index：表的索引
-def excel_table_byindex(file= 'file.xls',colnameindex=0,by_index=0):
-    data = open_excel(file)
-    table = data.sheets()[by_index]
-    nrows = table.nrows #行数
-    ncols = table.ncols #列数
-    #colnames =  table.row_values(colnameindex) #某一行数据
-
-    for rownum in range(0,nrows):
-        row = table.row_values(rownum)
-        map_dict = []
-        typeCell0 = table.cell_type(rownum, 0)
-        typeCell1 = table.cell_type(rownum, 1)
-        typeCell2 = table.cell_type(rownum, 2)
-        if (len(row) > 2 ):
-            row[0] = read_cell(table, rownum, 0)
-            row[1] = read_cell(table, rownum, 1)
-            row[2] = read_cell(table, rownum, 2)
-            if (row[0].startswith('//') or row[0].startswith('/*')):
-                map_dict.append(row[0])
-            elif (row[1] == '' or typeCell0 == 0):
-                map_dict.append(row[0])
-            elif row[2] == '' or typeCell2 == 0:
-                map_dict.append(row[0])
-                map_dict.append(row[1])
-                if (typeCell0 != 1 or typeCell1 != 1):
-                    err_msg = {}
-                    err_msg['line'] = rownum;
-                    err_msg['key'] = row[0];
-                    globalVal.g_list_result_error_cols.append(err_msg)
-            else:
-                map_dict.append(row[0])
-                map_dict.append(row[2])
-                if (typeCell0 != 1 or typeCell1 != 1 or typeCell2 != 1):
-                    err_msg = {}
-                    err_msg['line'] = rownum;
-                    err_msg['key'] = row[0];
-                    globalVal.g_list_result_error_cols.append(err_msg)
-        elif (len(row) > 0) :
-            map_dict.append(row[0])
-        else:
-            continue
-        globalVal.g_list_all_res_vals.append(map_dict)
-    return globalVal.g_list_all_res_vals
-
-#根据名称获取Excel表格中的数据
-# 参数:file：Excel文件路径
-# colnameindex：表头列名所在行的所以  ，by_name：Sheet1名称
-def excel_table_byname(file= 'file.xls',colnameindex=0,by_name=u'Sheet1'):
-    data = open_excel(file)
-    table = data.sheet_by_name(by_name)
-    nrows = table.nrows #行数
-    colnames =  table.row_values(colnameindex) #某一行数据
-    list =[]
-    for rownum in range(1,nrows):
-         row = table.row_values(rownum)
-         if row:
-             app = {}
-             for i in range(len(colnames)):
-                app[colnames[i]] = row[i]
-             list.append(app)
-    return list
-
-
-def save_result_txt(file='res.txt', res_list = [], apptype = 0):
-    list_res = ""
-    with codecs.open(file, 'w', encoding='utf8') as fp:
-        # fieldnames = ['key', 'value']
-        for ele in res_list:
-            if (apptype == 0) :
-                if (len(ele) == 1) :
-                    s = u'%s' % (ele[0])
-                elif (len(ele) == 2):
-                    s = u'"%s" = "%s";\n' %(ele[0], ele[1])
-                else:
-                    continue
-            else:
-                continue
-            list_res = list_res + s;
-        fp.write(list_res)
