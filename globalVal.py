@@ -6,6 +6,7 @@ g_data_file = ""
 g_excel_file = ""
 g_res_file = ""
 g_old_resurce_data = {}
+g_old_resurce_data_index = {}
 g_new_resurce_data_en = {}
 g_new_resurce_data_all = {}
 

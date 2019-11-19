@@ -62,7 +62,7 @@ def get_pure_data(data_str):
     return None
 
 
-def store_one_recd(line_str, filedataDicts):
+def store_one_recd(line_str, index, indexDict, filedataDicts):
     line_list = line_str.split("=")
     #print line_list
     if len(line_list) < 2:
@@ -70,20 +70,20 @@ def store_one_recd(line_str, filedataDicts):
             line_list[0].strip()
             if line_list[0].startswith('//'):
                 print "Comment  : {}".format(line_str)
-                return filedataDicts
+                return index, indexDict, filedataDicts
             elif line_list[0].startswith('/*'):
                 print "Comment  : {}".format(line_str)
-                return filedataDicts
+                return index, indexDict, filedataDicts
             else :
                 print "error data  list len = {} : {}".format(len(line_list), line_str)
-                return filedataDicts
+                return index, indexDict, filedataDicts
         else:
             print "error data EMPTY {} ".format(line_str)
-            return filedataDicts
+            return index, indexDict, filedataDicts
     val_str = None
     if len(line_list) == 0:
         print "ERROR DATA line_list length 0"
-        return filedataDicts
+        return index, indexDict, filedataDicts
 
     elif len(line_list) > 1:
         val_str = get_pure_data(line_list[1])
@@ -92,14 +92,19 @@ def store_one_recd(line_str, filedataDicts):
         val_str = None
         key_str = line_list[0]
         print "ERROR DATA : {}".format(line_list)
-        return filedataDicts
+        return index, indexDict, filedataDicts
     if val_str:
         # dict_ele.append(val_str)
         filedataDicts[key_str] = val_str.strip()
+        indexDict[index] = key_str
+        index = index + 1
     else:
         filedataDicts[key_str] = ""
+        indexDict[index] = key_str
+        index = index + 1
+        print ("store_one_recd : line_str = {}".format(line_str))
     # globalVal.g_list_all_vals.append(dict_ele)
-    return filedataDicts
+    return index, indexDict,filedataDicts
 
 
 def save_to_excel(xlsfilename, list_val):
@@ -135,6 +140,8 @@ def save_to_cvs(csvfilename, dict_val):
 def import_ios_resource_data(filename):
     fp = None
     filedataDicts = {}
+    indexDict = {}
+    index = 0
     with codecs.open(filename, 'r', encoding='utf8') as fp:
         fp = open_file(filename)
         while True:
@@ -142,8 +149,9 @@ def import_ios_resource_data(filename):
             if not line:
                 break
             #print line
-            store_one_recd(line, filedataDicts)
-    return filedataDicts
+            index, indexDict, filedataDicts = store_one_recd(line, index, indexDict, filedataDicts)
+
+    return indexDict,filedataDicts
 
 
 

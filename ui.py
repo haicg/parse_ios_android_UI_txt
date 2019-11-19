@@ -16,7 +16,7 @@ import parseExcel
 
 # 获取脚本文件的当前路径
 from diroperation import initDirs
-from saveMapToResFile import save_all_langs_to_ios
+from saveMapToResFile import save_all_langs_to_ios, save_all_langs_to_ios_with_keyindex
 
 
 def cur_file_dir():
@@ -65,6 +65,7 @@ def donothing():
 
 def choose_data_file():
     filedata = {}
+    indexDict = {}
     filename = tkFileDialog.askopenfilename(title='choose data file',
                                             filetypes=[('TXT', '*.txt'), ('XML', '*.xml')],
                                             initialdir=cur_file_dir())
@@ -76,11 +77,11 @@ def choose_data_file():
         filedata = parseFromXml.import_data(filename)
     elif pathext == '.txt' or pathext == '.TXT':
         print "TXT FILE"
-        filedata = parse_words.import_ios_resource_data(filename)
+        indexDict, filedata = parse_words.import_ios_resource_data(filename)
         print filedata
     else:
-        return filedata
-    return filedata
+        return indexDict, filedata
+    return indexDict, filedata
     # data_excel_name = tkFileDialog.asksaveasfilename(title='save empty Excel file',
     #                                                  filetypes=[('Excel', '*.xls')],
     #                                                  initialdir=cur_file_dir())
@@ -91,8 +92,9 @@ def choose_data_file():
 
 
 def choose_old_data_file():
-    dataDicts = choose_data_file()
+    indexDict, dataDicts = choose_data_file()
     globalVal.g_old_resurce_data = dataDicts
+    globalVal.g_old_resurce_data_index = indexDict
 
 
 def convert_to_new_resource():
@@ -109,24 +111,27 @@ def convert_to_new_resource():
     for lang,val_dict in globalVal.g_new_resurce_data_all.items():
         one_lang = {}
         one_lang_error_result_dicts = {}
-        for old_key,en_value in globalVal.g_old_resurce_data.items():
+        for index, old_key in globalVal.g_old_resurce_data_index.items():
+            old_en_value = globalVal.g_old_resurce_data[old_key]
+        # for old_key,en_value in globalVal.g_old_resurce_data.items():
             new_val = ""
             new_key = ""
-            if new_resurce_data_dict_enval_key.has_key(en_value):
-                new_key = new_resurce_data_dict_enval_key[en_value]
+            if new_resurce_data_dict_enval_key.has_key(old_en_value):
+                new_key = new_resurce_data_dict_enval_key[old_en_value]
                 if val_dict.has_key(new_key):
                     new_val = val_dict[new_key]
 
             if new_val:
                 one_lang[old_key] = new_val
             else:
-                one_lang_error_result_dicts[old_key] = "{}\n {}_____org____ = {}".format(new_key, old_key,en_value)
+                one_lang_error_result_dicts[old_key] = new_key
+                # one_lang_error_result_dicts[old_key] = "{}\n {}_____org____ = {}".format(new_key, old_key, old_en_value)
                 one_lang[old_key] = ""
 
         result_dicts[lang] = one_lang
         error_result_dicts[lang] = one_lang_error_result_dicts
-    save_all_langs_to_ios(globalVal.g_dir_ios_convert_result, result_dicts)
-    save_all_langs_to_ios(globalVal.g_dir_ios_convert_error_result, error_result_dicts)
+    save_all_langs_to_ios_with_keyindex(globalVal.g_old_resurce_data_index, globalVal.g_dir_ios_convert_result, result_dicts)
+    save_all_langs_to_ios_with_keyindex(globalVal.g_old_resurce_data_index, globalVal.g_dir_ios_convert_error_result, error_result_dicts)
     tkMessageBox.showinfo('Result', "Success, see dir ios_convert_to_old_keys ")
     return
 
