@@ -43,7 +43,7 @@ def excel_table_byindex(file='file.xls', colnameindex=0, by_index=0):
             row[0] = read_cell(table, rownum, 0)
             row[1] = read_cell(table, rownum, 1)
             row[2] = read_cell(table, rownum, 2)
-            if (row[0].startswith('//') or row[0].startswith('/*')):
+            if row[0].startswith('//') or row[0].startswith('/*'):
                 map_dict.append(row[0])
             elif (row[1] == '' or typeCell0 == 0):
                 map_dict.append(row[0])
@@ -52,16 +52,16 @@ def excel_table_byindex(file='file.xls', colnameindex=0, by_index=0):
                 map_dict.append(row[1])
                 if (typeCell0 != 1 or typeCell1 != 1):
                     err_msg = {}
-                    err_msg['line'] = rownum;
-                    err_msg['key'] = row[0];
+                    err_msg['line'] = rownum
+                    err_msg['key'] = row[0]
                     globalVal.g_list_result_error_cols.append(err_msg)
             else:
                 map_dict.append(row[0])
                 map_dict.append(row[2])
                 if (typeCell0 != 1 or typeCell1 != 1 or typeCell2 != 1):
                     err_msg = {}
-                    err_msg['line'] = rownum;
-                    err_msg['key'] = row[0];
+                    err_msg['line'] = rownum
+                    err_msg['key'] = row[0]
                     globalVal.g_list_result_error_cols.append(err_msg)
         elif (len(row) > 0):
             map_dict.append(row[0])
@@ -82,9 +82,14 @@ def load_one_lang_single_sheet(excel_object, table, key_index, val_index):
     nrows = table.nrows  # 行数
     for rownum in range(1, nrows):
         row_values = table.row_values(rownum)
-        if row_values and row_values[key_index]:
-            if row_values[val_index]:
-                result_map[row_values[key_index]] = row_values[val_index].strip()
+        if not row_values:
+            continue
+        keyname = row_values[key_index].strip()
+        keyvalue = row_values[val_index].strip()
+
+        if keyname and keyname != "":
+            if keyvalue:
+                result_map[row_values[key_index]] = keyvalue
             else:
                 result_map[row_values[key_index]] = ""
                 error_map[row_values[key_index]] = ""
@@ -131,7 +136,8 @@ def load_langs_sheet(excel_object, sheetname, colnameindex=0):
     for lang_name, lang_index in colMap.items():
         # if len(langs_map) == 0:
         #     langs_map[lang_index] = {}
-        langs_map[lang_name], error_map[lang_name] = load_one_lang_single_sheet(excel_object, table, keynameIndex, lang_index)
+        langs_map[lang_name], error_map[lang_name] = load_one_lang_single_sheet(excel_object, table, keynameIndex,
+                                                                                lang_index)
     if not error_map:
         error_map = {}
     if not langs_map:
@@ -161,12 +167,11 @@ def excel_load_sheets(file='file.xls'):
             if not onesheet_error_map:
                 continue
             for lang_name, lang_val_map in onesheet_error_map.items():
-                print lang_name,lang_val_map
+                print lang_name, lang_val_map
                 if lang_name in error_all_map:
                     error_all_map[lang_name] = dict(error_all_map[lang_name], **lang_val_map)
                 else:
                     error_all_map[lang_name] = lang_val_map
-
 
     for (lang_name, lang_val_map) in langs_map.items():
         print lang_name
