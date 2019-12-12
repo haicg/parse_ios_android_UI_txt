@@ -1,6 +1,7 @@
 #!/usr/bin/python2.7
 # coding=utf-8
 from globalVal import g_dir_ios_convert_error_result, g_dir_ios_convert_result, g_dir_ios_all_langs_result
+from globalVal import g_dir_android_all_langs_result, g_dir_all_langs_error_result
 
 
 def mkdir(path):
@@ -33,3 +34,7 @@ def initDirs():
     mkdir(g_dir_ios_convert_error_result)
     mkdir(g_dir_ios_convert_result)
     mkdir(g_dir_ios_all_langs_result)
+    mkdir(g_dir_android_all_langs_result)
+    mkdir(g_dir_all_langs_error_result)
+
+

@@ -16,7 +16,7 @@ import parseExcel
 
 # 获取脚本文件的当前路径
 from diroperation import initDirs
-from saveMapToResFile import save_all_langs_to_ios, save_all_langs_to_ios_with_keyindex
+from saveMapToResFile import save_all_langs_to_ios, save_all_langs_to_ios_with_keyindex, save_all_langs_to_android
 
 
 def cur_file_dir():
@@ -212,10 +212,13 @@ def load_langs_excel():
         globalVal.g_new_resurce_data_en = map_dict_val[u'EN英语']
         globalVal.g_new_resurce_data_all = map_dict_val
         save_all_langs_to_ios(globalVal.g_dir_ios_all_langs_result, map_dict_val)
-        save_all_langs_to_ios(globalVal.g_dir_ios_all_langs_error_result, error_all_map)
+        save_all_langs_to_android(globalVal.g_dir_android_all_langs_result, map_dict_val)
+        # Store error result
+        save_all_langs_to_ios(globalVal.g_dir_all_langs_error_result, error_all_map)
 
     else:
         tkMessageBox.showinfo('Error', "Load Excel file Error")
+
 
 def ui_create():
     root = Tk()
