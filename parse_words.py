@@ -1,10 +1,11 @@
 # coding=utf-8
-import sys,os
+import sys, os
 import sqlite3
 import errno
 import json
 import globalVal
 import sys
+
 reload(sys)
 sys.setdefaultencoding('utf8')
 
@@ -21,7 +22,7 @@ def connect_db():
 
 def close_file(fp):
     try:
-        fp. close()
+        fp.close()
     except IOError as e:
         if e.errno == errno.EACCES:
             return "some default data"
@@ -38,8 +39,9 @@ def open_file(filename):
         # Not a permission error.
         raise IOError
     else:
-#      with fp:
-            return fp
+        #      with fp:
+        return fp
+
 
 def open_file_write(filename):
     try:
@@ -50,8 +52,8 @@ def open_file_write(filename):
         # Not a permission error.
         raise
     else:
-#      with fp:
-            return fp
+        #      with fp:
+        return fp
 
 
 def get_pure_data(data_str):
@@ -64,7 +66,7 @@ def get_pure_data(data_str):
 
 def store_one_recd(line_str, index, indexDict, filedataDicts):
     line_list = line_str.split("=")
-    #print line_list
+    # print line_list
     if len(line_list) < 2:
         if len(line_list) == 1:
             line_list[0].strip()
@@ -74,7 +76,7 @@ def store_one_recd(line_str, index, indexDict, filedataDicts):
             elif line_list[0].startswith('/*'):
                 print "Comment  : {}".format(line_str)
                 return index, indexDict, filedataDicts
-            else :
+            else:
                 print "error data  list len = {} : {}".format(len(line_list), line_str)
                 return index, indexDict, filedataDicts
         else:
@@ -104,15 +106,15 @@ def store_one_recd(line_str, index, indexDict, filedataDicts):
         index = index + 1
         print ("store_one_recd : line_str = {}".format(line_str))
     # globalVal.g_list_all_vals.append(dict_ele)
-    return index, indexDict,filedataDicts
+    return index, indexDict, filedataDicts
 
 
 def save_to_excel(xlsfilename, list_val):
     wbk = xlwt.Workbook(encoding='utf-8', style_compression=0)
     sheet = wbk.add_sheet('sheet 1', cell_overwrite_ok=True)  ##第二参数用于确认同一个cell单元是否可以重设值。
 
-    sheet.write(0,0,'some text')
-    sheet.write(0,0,'this should overwrite')   ##重新设置，需要cell_overwrite_ok=True
+    sheet.write(0, 0, 'some text')
+    sheet.write(0, 0, 'this should overwrite')  ##重新设置，需要cell_overwrite_ok=True
 
     style = xlwt.XFStyle()
     font = xlwt.Font()
@@ -125,15 +127,16 @@ def save_to_excel(xlsfilename, list_val):
         if (len(ele) > 1):
             sheet.write(i, j + 1, ele[1], style)
         sheet.write(i, j, ele[0], style)
-        i = i+1
-    wbk.save(xlsfilename)    ##该文件名必须存在
+        i = i + 1
+    wbk.save(xlsfilename)  ##该文件名必须存在
+
 
 def save_to_cvs(csvfilename, dict_val):
     with open(csvfilename, 'wb') as csvfile:
-        #fieldnames = ['key', 'value']
+        # fieldnames = ['key', 'value']
         writer = csv.writer(csvfile)
-        for (k,v) in dict_val.items():
-            #print [k , v]
+        for (k, v) in dict_val.items():
+            # print [k , v]
             writer.writerow([k, v])
 
 
@@ -148,10 +151,7 @@ def import_ios_resource_data(filename):
             line = fp.readline()
             if not line:
                 break
-            #print line
+            # print line
             index, indexDict, filedataDicts = store_one_recd(line, index, indexDict, filedataDicts)
 
-    return indexDict,filedataDicts
-
-
-
+    return indexDict, filedataDicts

@@ -135,6 +135,8 @@ def excel_load_sheets(file= 'file.xls'):
             print item
             onesheet_langs_map = load_langs_sheet(excel_obj, item)
             # print onesheet_langs_map
+            if not onesheet_langs_map:
+                continue
             for lang_name, lang_val_map in onesheet_langs_map.items():
                 if not langs_map.has_key(lang_name):
                     langs_map[lang_name] = lang_val_map
