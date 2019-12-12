@@ -123,6 +123,9 @@ def getColMap(colnames):
 
 def load_langs_sheet(excel_object, sheetname, colnameindex=0):
     table = excel_object.sheet_by_name(sheetname)
+    nrows = table.nrows
+    if nrows < 1:
+        return {},{}
     colnames = table.row_values(colnameindex)  # 某一行数据
     langs_map = {}
     error_map = {}
