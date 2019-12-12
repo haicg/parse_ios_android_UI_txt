@@ -13,3 +13,4 @@ g_new_resurce_data_all = {}
 g_dir_ios_convert_result = "ios_convert_to_old_keys"
 g_dir_ios_convert_error_result = "error_ios_convert_to_old_keys"
 g_dir_ios_all_langs_result = "result_ios"
+g_dir_ios_all_langs_error_result = "error_result"

@@ -145,13 +145,13 @@ def choose_excel_file():
     if (not excel_file_name) or excel_file_name == "":
         return map_dict_val
     else:
-        map_dict_val = parseExcel.excel_load_sheets(file=excel_file_name)
+        map_dict_val, error_all_maps = parseExcel.excel_load_sheets(file=excel_file_name)
     (filepath, tempfilename) = os.path.split(excel_file_name)
     os.path.splitext(tempfilename)
     (filename, extension) = os.path.splitext(tempfilename)
     globalVal.g_excel_file = filename
     # print map_dict_val
-    return map_dict_val
+    return map_dict_val, error_all_maps
 
 
 def save_err_check_to_file(res_file_name):
@@ -207,11 +207,13 @@ def save_to_xml():
 
 
 def load_langs_excel():
-    map_dict_val = choose_excel_file()
+    map_dict_val, error_all_map = choose_excel_file()
     if map_dict_val:
         globalVal.g_new_resurce_data_en = map_dict_val[u'EN英语']
         globalVal.g_new_resurce_data_all = map_dict_val
         save_all_langs_to_ios(globalVal.g_dir_ios_all_langs_result, map_dict_val)
+        save_all_langs_to_ios(globalVal.g_dir_ios_all_langs_error_result, error_all_map)
+
     else:
         tkMessageBox.showinfo('Error', "Load Excel file Error")
 
