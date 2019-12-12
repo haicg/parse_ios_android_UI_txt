@@ -80,8 +80,12 @@ def load_one_lang_single_sheet(excel_object, table, key_index, val_index):
     nrows = table.nrows  # 行数
     for rownum in range(1,nrows):
         row_values = table.row_values(rownum)
-        if row_values and row_values[key_index] and row_values[val_index]:
-            result_map[row_values[key_index]] = row_values[val_index].strip()
+        if row_values and row_values[key_index]:
+            if row_values[val_index]:
+                result_map[row_values[key_index]] = row_values[val_index].strip()
+            else:
+                result_map[row_values[key_index]] = row_values[key_index]
+
     return result_map
 
 
