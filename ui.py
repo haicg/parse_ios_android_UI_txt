@@ -11,6 +11,7 @@ import globalVal
 import parse_words
 import parseFromXml
 import parseExcel
+from saveMapToDB import save_all_langs_to_db
 
 
 
@@ -71,7 +72,7 @@ def choose_data_file():
                                             initialdir=cur_file_dir())
 
     pathext = os.path.splitext(filename)[1]
-    print pathext
+    print (pathext)
     if pathext == '.xml' or pathext == '.XML':
         print "XML FILE"
         filedata = parseFromXml.import_data(filename)
@@ -96,6 +97,7 @@ def choose_old_data_file():
     globalVal.g_old_resurce_data = dataDicts
     globalVal.g_old_resurce_data_index = indexDict
 
+    
 
 def convert_to_new_resource():
     result_dicts = {}
@@ -152,6 +154,10 @@ def choose_excel_file():
     globalVal.g_excel_file = filename
     # print map_dict_val
     return map_dict_val, error_all_maps
+
+def store_excel_to_mysql():
+    map_dict_val = choose_excel_file()
+    # save_all_langs_to_db(map_dict_val)
 
 
 def save_err_check_to_file(res_file_name):
@@ -291,6 +297,8 @@ def botton_ui_create():
     # buttonImport.pack(side=TOP)
 
     buttonImport = Button(centerFrame, text='Convert New TO IOS TXT', width=40, height=4, command=convert_to_new_resource)
+    buttonImport.pack(side=TOP)
+    buttonImport = Button(centerFrame, text='Store Data To DB', width=40, height=4, command=store_excel_to_mysql)
     buttonImport.pack(side=TOP)
     mainloop()
 

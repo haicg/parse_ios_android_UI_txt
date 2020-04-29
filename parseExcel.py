@@ -1,6 +1,6 @@
 #!/usr/bin/python2.7
 # coding=utf-8
-
+import codecs
 
 import xlrd
 import globalVal
@@ -10,8 +10,8 @@ def open_excel(file='file.xls'):
     try:
         data = xlrd.open_workbook(file)
         return data
-    except Exception, e:
-        print str(e)
+    except Exception as e:
+        print (e)
 
 
 def read_cell(table, x, y):
@@ -76,6 +76,33 @@ def excel_table_byindex(file='file.xls', colnameindex=0, by_index=0):
 # colnameindex：表头列名所在行的所以  ，by_name：Sheet1名称
 
 
+def load4Sql(excel_object, table, key_index,sqlcomap):
+    result_map = {}
+    error_map = {}
+    nrows = table.nrows  # 行数
+    # print(sqlcomap)
+    sql = ''
+    for rownum in range(1, nrows):
+        sqlCols = ''
+        sqlValues = ''
+        row_values = table.row_values(rownum)
+        if not row_values:
+            continue
+        keyname = row_values[key_index].strip()
+
+        if keyname and keyname != "":
+            for i,v in sqlcomap.items():
+                keyvalue = row_values[i].strip()
+                sqlCols = sqlCols + v + ','
+                keyvalue=keyvalue.replace("'", "\\'")
+                keyvalue=keyvalue.replace("\\\\'", "\\'")
+                # keyvalue=keyvalue.replace("\n", "\\n")
+                # keyvalue=keyvalue.replace("\\\\n", "\\n")
+                sqlValues += "'{}',".format(keyvalue)
+            sql += ("replace into app_translation (keyname,{}) values ('{}',{});".format(sqlCols[:-1],keyname,sqlValues[:-1]))
+            sql +='\n'
+    return sql
+
 def load_one_lang_single_sheet(excel_object, table, key_index, val_index):
     result_map = {}
     error_map = {}
@@ -84,15 +111,15 @@ def load_one_lang_single_sheet(excel_object, table, key_index, val_index):
         row_values = table.row_values(rownum)
         if not row_values:
             continue
-        keyname = row_values[key_index].strip()
-        keyvalue = row_values[val_index].strip()
+    keyname = row_values[key_index].strip()
+    keyvalue = row_values[val_index].strip()
 
-        if keyname and keyname != "":
-            if keyvalue:
-                result_map[row_values[key_index]] = keyvalue
-            else:
-                result_map[row_values[key_index]] = ""
-                error_map[row_values[key_index]] = ""
+    if keyname and keyname != "":
+        if keyvalue:
+            result_map[row_values[key_index]] = keyvalue
+        else:
+            result_map[row_values[key_index]] = ""
+            error_map[row_values[key_index]] = ""
 
     return result_map, error_map
 
@@ -121,6 +148,21 @@ def getColMap(colnames):
     return keynameIndex, langname2indexmap, index2langnamemap
 
 
+def GetSqlColsMap(index2langname):
+    print (index2langname)
+    colsRes = {}
+    for k, v in index2langname.items():
+        print (k)
+        print (v)
+        if v == u"EN英语":
+            colsRes[k] = 'en'
+        elif v == u"CN中文":
+            colsRes[k] = 'zh'
+        # elif v == u"SE瑞典语":
+        #     colsRes[k] = 'se'
+    return colsRes
+
+
 def load_langs_sheet(excel_object, sheetname, colnameindex=0):
     table = excel_object.sheet_by_name(sheetname)
     nrows = table.nrows
@@ -134,19 +176,24 @@ def load_langs_sheet(excel_object, sheetname, colnameindex=0):
     list = []
     global g_langs_map
     keynameIndex, colMap, index2langname = getColMap(colnames)
+    sqlcomap=GetSqlColsMap(index2langname)
+    sql = ""
     if keynameIndex < 0:
         return langs_map, error_map
-    for lang_name, lang_index in colMap.items():
+    # for lang_name, lang_index in colMap.items():
         # if len(langs_map) == 0:
         #     langs_map[lang_index] = {}
-        langs_map[lang_name], error_map[lang_name] = load_one_lang_single_sheet(excel_object, table, keynameIndex,
-                                                                                lang_index)
+        # langs_map[lang_name], error_map[lang_name] = load_one_lang_single_sheet(excel_object, table, keynameIndex,
+        #                                                                         lang_index)
+    sql = load4Sql(excel_object, table, keynameIndex, sqlcomap)
     if not error_map:
         error_map = {}
     if not langs_map:
         langs_map = {}
-    print error_map
-    return langs_map, error_map
+    print (error_map)
+    # print(sql)
+ 
+    return langs_map, error_map,sql
 
 
 def excel_load_sheets(file='file.xls'):
@@ -154,10 +201,17 @@ def excel_load_sheets(file='file.xls'):
     names = excel_obj.sheet_names()
     langs_map = {}
     error_all_map = {}
+    sql=''
+    print(names)
     for item in names:
+        sql2 =''
         if u"版本备注" != item:
-            print "###" + item
-            onesheet_langs_map, onesheet_error_map = load_langs_sheet(excel_obj, item)
+            print ("###" + item)
+            try:
+                onesheet_langs_map, onesheet_error_map,sql2 = load_langs_sheet(excel_obj, item)
+            except Exception as identifier:
+                print(identifier)
+            sql+=sql2
             # print onesheet_langs_map
             if not onesheet_langs_map:
                 continue
@@ -170,12 +224,13 @@ def excel_load_sheets(file='file.xls'):
             if not onesheet_error_map:
                 continue
             for lang_name, lang_val_map in onesheet_error_map.items():
-                print lang_name, lang_val_map
+                print ('############ ',lang_name, lang_val_map)
                 if lang_name in error_all_map:
                     error_all_map[lang_name] = dict(error_all_map[lang_name], **lang_val_map)
                 else:
                     error_all_map[lang_name] = lang_val_map
-
+    with codecs.open('tran.sql', 'w', encoding='utf8') as fp:
+        fp.write(sql)
     for (lang_name, lang_val_map) in langs_map.items():
         print lang_name
         print len(lang_val_map)
